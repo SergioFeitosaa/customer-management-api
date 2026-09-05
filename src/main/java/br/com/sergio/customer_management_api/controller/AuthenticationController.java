@@ -1,6 +1,9 @@
 package br.com.sergio.customer_management_api.controller;
 
+import br.com.sergio.customer_management_api.config.security.TokenService;
+import br.com.sergio.customer_management_api.database.entity.User;
 import br.com.sergio.customer_management_api.dto.LoginRequestDTO;
+import br.com.sergio.customer_management_api.dto.TokenResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,17 +20,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
 
     private final AuthenticationManager manager;
+    private final TokenService tokenService;
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody @Valid LoginRequestDTO dto) {
+    public ResponseEntity<TokenResponseDTO> login(
+            @RequestBody @Valid LoginRequestDTO dto) {
 
-        var token = new UsernamePasswordAuthenticationToken(
+        var authenticationToken = new UsernamePasswordAuthenticationToken(
                 dto.email(),
                 dto.password());
 
-        var authentication = manager.authenticate(token);
+        var authentication = manager.authenticate(authenticationToken);
 
-        return ResponseEntity.ok().build();
+        var tokenJWT = tokenService.generateToken(
+                (User) authentication.getPrincipal());
 
+        return ResponseEntity.ok(new TokenResponseDTO(tokenJWT));
     }
 }

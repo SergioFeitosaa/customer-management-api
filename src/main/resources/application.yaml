@@ -18,5 +18,8 @@ spring:
       hibernate:
         format_sql: true
 
-
-
+api:
+  security:
+    token:
+      secret: minha-chave
+      expiration: 7200
